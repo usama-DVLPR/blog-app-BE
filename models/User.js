@@ -1,5 +1,5 @@
 import { Schema, model } from "mongoose";
-
+import { hash } from "bcryptjs";
 const UserSchema = new Schema(
   {
     avatar: { type: String, default: "" },
@@ -13,5 +13,12 @@ const UserSchema = new Schema(
   { timestamps: true }
 );
 
+UserSchema.pre("save", async function (next) {
+  if (this.isModified("password")) {
+    this.password = await hash(this.password, 10);
+    return next();
+  }
+  return next();
+});
 const User = model("User", UserSchema);
 export default User;
