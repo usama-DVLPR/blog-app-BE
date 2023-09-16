@@ -1,5 +1,5 @@
 import { Schema, model } from "mongoose";
-import { hash } from "bcryptjs";
+import { hash, compare } from "bcryptjs";
 import { sign } from "jsonwebtoken";
 const UserSchema = new Schema(
   {
@@ -28,5 +28,8 @@ UserSchema.methods.generateJWT = async function () {
   });
 };
 
+UserSchema.methods.comparePassword = async function (enteredPassword) {
+  return await compare(enteredPassword, this.password);
+};
 const User = model("User", UserSchema);
 export default User;
