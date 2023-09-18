@@ -107,12 +107,17 @@ export const updateProfilePicture = async (req, res, next) => {
     upload(req, res, async function (err) {
       if (err) {
         const error = new Error("An unknown error occured while uploading");
-        next(err);
+        next(error);
       } else {
         if (req.file) {
-          const updatedUser = await User.findByIdAndUpdate(req.user._id, {
-            avatar: req.file.filename,
-          },{new:true});
+          let filename;
+          let updatedUser = await User.findById(req.user._id);
+          filename = updatedUser.avatar;
+          if (filename) {
+            fileRemover(filename);
+          }
+          updatedUser.avatar = req.file.filename;
+          await updatedUser.save();
           res.status(200).json({
             _id: updatedUser._id,
             avatar: updatedUser.avatar,
@@ -121,13 +126,13 @@ export const updateProfilePicture = async (req, res, next) => {
             verified: updatedUser.verified,
             admin: updatedUser.admin,
           });
-        }else{
-          let fileName
-          let updatedUser=await User.findById(req.user._id)
-          fileName=updatedUser.avatar
-          updatedUser.avatar=""
-          await updatedUser.save()
-          fileRemover(fileName)
+        } else {
+          let fileName;
+          let updatedUser = await User.findById(req.user._id);
+          fileName = updatedUser.avatar;
+          updatedUser.avatar = "";
+          await updatedUser.save();
+          fileRemover(fileName);
           res.status(200).json({
             _id: updatedUser._id,
             avatar: updatedUser.avatar,
